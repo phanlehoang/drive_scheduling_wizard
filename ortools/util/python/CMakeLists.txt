@@ -1,0 +1,37 @@
+# Copyright 2010-2022 Google LLC
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+pybind11_add_module(sorted_interval_list MODULE sorted_interval_list.cc)
+# note: macOS is APPLE and also UNIX !
+if(APPLE)
+  set_target_properties(sorted_interval_list PROPERTIES
+    SUFFIX ".so"
+    INSTALL_RPATH "@loader_path;@loader_path/../../../${PYTHON_PROJECT}/.libs"
+    )
+  set_property(TARGET sorted_interval_list APPEND PROPERTY
+    LINK_FLAGS "-flat_namespace -undefined suppress"
+    )
+elseif(UNIX)
+  set_target_properties(sorted_interval_list PROPERTIES
+    INSTALL_RPATH "$ORIGIN:$ORIGIN/../../../${PYTHON_PROJECT}/.libs"
+    )
+endif()
+target_link_libraries(sorted_interval_list PRIVATE ${PROJECT_NAMESPACE}::ortools)
+add_library(${PROJECT_NAMESPACE}::sorted_interval_list ALIAS sorted_interval_list)
+
+if(BUILD_TESTING)
+  file(GLOB PYTHON_SRCS "*_test.py")
+  foreach(FILE_NAME IN LISTS PYTHON_SRCS)
+    add_python_test(${FILE_NAME})
+  endforeach()
+endif()
